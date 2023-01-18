@@ -6,17 +6,12 @@ public class Main {
 
     private static ArrayList<Contacts> contacts;
     private static Scanner scanner;
+    private static int id = 0;
 
     public static void main(String[] args){
         contacts = new ArrayList<>();
 
-
-        System.out.println("Hello!");
-
         showInitialOptions();
-
-
-
     }
 
     private static void showInitialOptions() {
@@ -24,43 +19,104 @@ public class Main {
 
         scanner = new Scanner(System.in);
         int choice = scanner.nextInt();
-        switch(choice){
-            case 1:
-                manageContacts();
-                break;
-            case 2:
-                manageMessages();
-                break;
-            default:
-                break;
+        switch (choice) {
+            case 1 -> manageContacts();
+            case 2 -> manageMessages();
         }
     }
 
-    private static void manageContacts() {
-        System.out.println("Select one:"+
-                "\n\t1. Show all contacts"+
-                "\n\t2. Add a new contact"+
-                "\n\t3. Search for a contact"+
-                "\n\t4. Delete a contact"+
-                "\n\t5. Go back");
-
+    private static void manageMessages() {
+        System.out.println("""
+                Select one:
+                \t1. See the list of all messages
+                \t2. Send a new message
+                \t3. Go back to the previous menu""");
         int choice = scanner.nextInt();
         switch(choice){
-            case 1:
-                showAllContacts();
-                break;
-            case 2:
-                addNewContact();
-                break;
-            case 3:
-                searchForContact();
-                break;
-            case 4:
-                deleteContact();
-                break;
-            default:
-                showInitialOptions();
-                break;
+            case 1 -> showListOfMessages();
+            case 2 -> sendNewMessage();
+            default -> showInitialOptions();
+        }
+    }
+
+    private static void sendNewMessage() {
+        System.out.println("Please enter contact's name");
+        String name = scanner.next();
+
+        if(name.equals("") ){
+            System.out.println("Please fill in the correct message");
+            sendNewMessage();
+        }
+        else{
+            boolean doesExist = false;
+            for(Contacts c : contacts){
+                if (c.getName().equals(name)) {
+                    doesExist = true;
+                    break;
+                }
+            }
+
+            if(doesExist){
+                System.out.println("Please enter a new message:");
+                String text = scanner.next();
+
+                if(text.equals("")){
+                    System.out.println("Please fill in the correct message");
+                    sendNewMessage();
+                }
+                else{
+                    id++;
+                    Message newMessage = new Message(text,id,name);
+                    for(Contacts c : contacts){
+                        if(c.getName().equals(name)){
+                            ArrayList<Message> newMessages = c.getMessages();
+                            newMessages.add(newMessage);
+                            c.setMessages((newMessages));
+                            contacts.remove(c);
+                            contacts.add(c);
+                        }
+                    }
+                }
+            }
+            else
+                System.out.println("There is no such contact");
+        }
+        manageMessages();
+    }
+
+    private static void showListOfMessages() {
+        ArrayList<Message> allMessages = new ArrayList<>();
+        System.out.println("List of Messages");
+        for(Contacts c : contacts)
+            allMessages.addAll(c.getMessages());
+
+        if(allMessages.size()>0){
+            for(Message m : allMessages) {
+                m.getDetails();
+                System.out.println("************");
+            }
+        }
+        else
+            System.out.println("You don't have any messages");
+        manageMessages();
+    }
+
+    private static void manageContacts() {
+        System.out.println("""
+                Select one:
+                \t1. Show all contacts
+                \t2. Add a new contact
+                \t3. Search for a contact
+                \t4. Delete a contact
+                \t5. Go back""");
+
+        int choice = scanner.nextInt();
+        switch (choice) {
+            case 1 -> showAllContacts();
+            case 2 -> addNewContact();
+            case 3 -> searchForContact();
+            case 4 -> deleteContact();
+            default -> showInitialOptions();
         }
     }
 
@@ -81,10 +137,8 @@ public class Main {
                      contacts.remove(con);
                  }
             }
-
-            if(!doesExits) {
+            if(!doesExits)
                 System.out.println("There is no such contact");
-            }
         }
         showInitialOptions();
     }
@@ -104,10 +158,8 @@ public class Main {
                     con.getDetails();
                 }
             }
-
-            if(!doesExist){
+            if(!doesExist)
                 System.out.println("There is no such contact in your phone");
-            }
         }
 
         showInitialOptions();
@@ -127,18 +179,30 @@ public class Main {
             addNewContact();
         }
         else{
-            Contacts contact = new Contacts(name,number,email);
-            contacts.add(contact);
-        }
+            boolean doesExist = false;
+            for(Contacts c : contacts) {
+                if (c.getName().equals(name)) {
+                    doesExist = true;
+                    break;
+                }
+            }
 
+            if(!doesExist) {
+                Contacts contact = new Contacts(name, number, email);
+                contacts.add(contact);
+                System.out.println(name + " added successfully");
+            }
+            else {
+                System.out.println("We have a contact named " + name + " saved on this device");
+                addNewContact();
+            }
+        }
         showInitialOptions();
     }
 
     private static void showAllContacts() {
-        for(Contacts con : contacts){
+        for(Contacts con : contacts)
             con.getDetails();
-        }
-
         showInitialOptions();
     }
 
